@@ -1,0 +1,50 @@
+version: '3.9'
+
+services:
+  one-api:
+    build: .
+    container_name: one-api
+    restart: always
+    command: --log-dir /app/logs
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data/oneapi:/data  # 挂载数据目录
+      - ./logs:/app/logs  # 挂载日志目录
+      - /path/to/local/code:/app  # 挂载本地代码目录到容器内
+    environment:
+      - SQL_DSN=oneapi:5dcWdY6ZTB8tmG3m@tcp(127.0.0.1:3306)/one-api  # 指向系统的 MySQL
+      - REDIS_CONN_STRING=redis://127.0.0.1:6379  # 指向系统的 Redis
+      - SESSION_SECRET=5dcWdY6ZTB8tmG3m  # 修改为随机字符串
+      - TZ=Asia/Shanghai
+      - SYNC_FREQUENCY=60  # 设置同步频率为 60 秒
+    network_mode: "host"  # 使用主机网络模式
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:3000/api/status | grep -o '\"success\":\\s*true' | awk -F: '{print $2}'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+
+
+
+# 注释掉或移除 Redis 和 MySQL 容器部分
+#  redis:
+#    image: "${REGISTRY:-docker.io}/redis:latest"
+#    container_name: redis
+#    restart: always
+
+#  db:
+#    image: "${REGISTRY:-docker.io}/mysql:8.2.0"
+#    restart: always
+#    container_name: mysql
+#    volumes:
+#      - ./data/mysql:/var/lib/mysql  # 挂载目录，持久化存储
+#    ports:
+#      - '3306:3306'
+#    environment:
+#      TZ: Asia/Shanghai   # 设置时区
+#      MYSQL_ROOT_PASSWORD: '5dcWdY6ZTB8tmG3m' # 设置 root 用户的密码
+#      MYSQL_USER: oneapi   # 创建专用用户
+#      MYSQL_PASSWORD: '5dcWdY6ZTB8tmG3m'    # 设置专用用户密码
+#      MYSQL_DATABASE: one-api   # 自动创建数据库

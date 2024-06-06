@@ -4,20 +4,17 @@ WORKDIR /web
 COPY ./VERSION .
 COPY ./web .
 
-# 构建 default 主题
 WORKDIR /web/default
 RUN npm install
-RUN mkdir -p ../build/default && DISABLE_ESLINT_PLUGIN='true' REACT_APP_VERSION=$(cat /web/VERSION) npm run build && mv build ../build/default
+RUN DISABLE_ESLINT_PLUGIN='true' REACT_APP_VERSION=$(cat VERSION) npm run build
 
-# 构建 berry 主题
 WORKDIR /web/berry
 RUN npm install
-RUN mkdir -p ../build/berry && DISABLE_ESLINT_PLUGIN='true' REACT_APP_VERSION=$(cat /web/VERSION) npm run build && mv build ../build/berry
+RUN DISABLE_ESLINT_PLUGIN='true' REACT_APP_VERSION=$(cat VERSION) npm run build
 
-# 构建 air 主题
 WORKDIR /web/air
 RUN npm install
-RUN mkdir -p ../build/air && DISABLE_ESLINT_PLUGIN='true' REACT_APP_VERSION=$(cat /web/VERSION) npm run build && mv build ../build/air
+RUN DISABLE_ESLINT_PLUGIN='true' REACT_APP_VERSION=$(cat VERSION) npm run build
 
 FROM golang AS builder2
 
@@ -30,7 +27,9 @@ ADD go.mod go.sum ./
 RUN go mod download
 COPY . .
 COPY --from=builder /web/build ./web/build
-RUN go build -ldflags "-s -w -X 'github.com/songquanpeng/one-api/common.Version=$(cat /build/VERSION)' -extldflags '-static'" -o one-api
+# RUN go build -ldflags "-s -w -X 'github.com/songquanpeng/one-api/common.Version=$(cat VERSION)' -extldflags '-static'" -o one-api
+RUN go build -ldflags "-s -w -X 'github.com/gogooing/aimiaimi-one/common.Version=$(cat /VERSION)' -extldflags '-static'" -o one-api
+
 
 FROM alpine
 

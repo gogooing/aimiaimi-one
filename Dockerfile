@@ -5,14 +5,17 @@ COPY ./VERSION .
 COPY ./web .
 
 WORKDIR /web/default
+COPY ./VERSION ./   
 RUN npm install
 RUN DISABLE_ESLINT_PLUGIN='true' REACT_APP_VERSION=$(cat VERSION) npm run build
 
 WORKDIR /web/berry
+COPY ./VERSION ./   
 RUN npm install
 RUN DISABLE_ESLINT_PLUGIN='true' REACT_APP_VERSION=$(cat VERSION) npm run build
 
 WORKDIR /web/air
+COPY ./VERSION ./   
 RUN npm install
 RUN DISABLE_ESLINT_PLUGIN='true' REACT_APP_VERSION=$(cat VERSION) npm run build
 
@@ -29,7 +32,6 @@ COPY . .
 COPY --from=builder /web/build ./web/build
 # RUN go build -ldflags "-s -w -X 'github.com/songquanpeng/one-api/common.Version=$(cat VERSION)' -extldflags '-static'" -o one-api
 RUN go build -ldflags "-s -w -X 'github.com/gogooing/aimiaimi-one/common.Version=$(cat /VERSION)' -extldflags '-static'" -o one-api
-
 
 FROM alpine
 
